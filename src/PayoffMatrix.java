@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class PayoffMatrices {
+public class PayoffMatrix {
     private int numMoves;
     private int[][] p1Payoffs;
     private int[][] p2Payoffs;
@@ -10,7 +10,7 @@ public class PayoffMatrices {
      * Creates a 2-player payoff matrix with either 2 or 3 moves
      * for Player 1 (P1) and Player 2 (P2)
      */
-    public PayoffMatrices(int numMoves, int[][] p1Payoffs, int[][] p2Payoffs) {
+    public PayoffMatrix(int numMoves, int[][] p1Payoffs, int[][] p2Payoffs) {
         this.numMoves = numMoves;
         this.p1Payoffs = p1Payoffs;
         this.p2Payoffs = p2Payoffs;
@@ -136,9 +136,13 @@ public class PayoffMatrices {
      * and 1-p is the probability they play their second. q is the
      * probability P2 plays their first move, and 1-1 is the probability
      * they play their second. Return null if payoff values do not provide
-     * valid equations for p and q using the method taught in class.
+     * valid equations for p and q using the method taught in class. Returns
+     * null if the matrix is not 2x2.
      */
     public ArrayList<Double> findMixedNashEquilibrium() {
+        if (numMoves == 3) {
+            return null;
+        }
         ArrayList<Double> pq = new ArrayList<>();
 
         //solve for p
