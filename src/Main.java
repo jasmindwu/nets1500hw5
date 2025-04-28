@@ -52,7 +52,8 @@ public class Main {
         System.out.println("1. Find the pure strategy Nash Equilibria, if they exist.”");
         System.out.println("2. If you have a 2x2 matrix, find the mixed strategy" +
                 " Nash Equilibrium.");
-        System.out.println("3. Edit your matrix and study to study the effects of your changes" +
+        System.out.println("3. Find a player's best response to the other player's specific move.");
+        System.out.println("4. Edit your matrix and study to study the effects of your changes" +
                 " after.");
         System.out.println("Type 'exit' to quit.\n");
 
@@ -92,6 +93,28 @@ public class Main {
                     System.out.println("p = " + p + "; q = " + q);
                 }
             } else if (input.equals("3")) {
+                System.out.println("Enter the player (1 or 2) you want to know their best response for.");
+                while (!scanner.hasNextInt()) {
+                    System.out.println("Please enter a valid number");
+                    scanner.next();
+                }
+                int player = scanner.nextInt();
+                System.out.println("Enter the move you want to know Player " + player
+                        + "'s best response to (ex. 1).");
+                while (!scanner.hasNextInt()) {
+                    System.out.println("Please enter a valid number");
+                    scanner.next();
+                }
+                int move = scanner.nextInt();
+
+                Integer bestResponse = matrix.findBestResponse(move, player);
+                if (bestResponse == null) {
+                    System.out.println("Either player or move provided was invalid.");
+                } else {
+                    System.out.println("Player " + player + "'s best response to the other player's Move "
+                            + move + " is: Move " + bestResponse);
+                }
+            } else if (input.equals("4")) {
                 System.out.println("Type the number of moves you want each player to have," +
                         " either 2 or 3 (please do not add extra characters or spaces).");
                 System.out.println("If an integer other than 2 or 3 is entered, the " +

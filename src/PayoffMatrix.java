@@ -98,12 +98,13 @@ public class PayoffMatrix {
 
     /**
      * Finds best response for a given player,
-     * given the other player's move.
-     * Assumes valid inputs (only used as a
-     * helper internally, so we ensure
-     * provided inputs are valid)
+     * given the other player's move. Returns null
+     * if given invalid input.
      */
-    private int findBestResponse(int move, int player) {
+    public Integer findBestResponse(int move, int player) {
+        if (move <= 0 || move > numMoves || player <= 0 || player > 2) {
+            return null;
+        }
         //Find player's best response to the other player's move
         int bestResponse = 1;
         if (player == 1) {
