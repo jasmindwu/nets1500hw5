@@ -53,7 +53,9 @@ public class Main {
         System.out.println("2. If you have a 2x2 matrix, find the mixed strategy" +
                 " Nash Equilibrium.");
         System.out.println("3. Find a player's best response to the other player's specific move.");
-        System.out.println("4. Edit your matrix and study to study the effects of your changes" +
+        System.out.println("4. For a 2x2 matrix, see how the pure-strategy Nash Equilibria" +
+                " translate to social networks represented in a graph setting.");
+        System.out.println("5. Edit your matrix and study to study the effects of your changes" +
                 " after.");
         System.out.println("Type 'exit' to quit.\n");
 
@@ -71,7 +73,8 @@ public class Main {
             if (input.equals("1")) {
                 ArrayList<ArrayList<Integer>> pureEquilibria = matrix.findPureNashEquilibrium();
                 if (pureEquilibria == null) {
-                    System.out.println("No pure strategy Nash Equilibrium exists!");
+                    System.out.println("No pure strategy Nash Equilibrium exists!" +
+                            " Try changing the payoff values.");
                 } else {
                     System.out.println("The following are pure strategy Nash Equilibrium: ");
                     for (ArrayList<Integer> square : pureEquilibria) {
@@ -115,6 +118,55 @@ public class Main {
                             + move + " is: Move " + bestResponse);
                 }
             } else if (input.equals("4")) {
+                ArrayList<ArrayList<Integer>> pureEquilibria = matrix.findPureNashEquilibrium();
+                if (pureEquilibria == null) {
+                    System.out.println("No pure strategy Nash Equilibrium exists!" +
+                            " Try changing the payoff values.");
+                } else {
+                    if (matrix.getNumMoves() == 3) {
+                        System.out.println("Try this with a 2x2 matrix.");
+                    } else {
+                        System.out.println("In a situation where Move 1 represents" +
+                                " helping the other player, and Move 2 represents " +
+                                "harming the other player, the following are pure " +
+                                "strategy Nash Equilibrium: ");
+                        for (ArrayList<Integer> square : pureEquilibria) {
+                            int move1 = square.get(0);
+                            int move2 = square.get(1);
+                            System.out.println("(Move " + move1 + " for P1, Move "
+                                    + move2 + " for P2)");
+                            System.out.println("If we represent this in a graph, with player 1" +
+                                    " as vertex 1, and player 2 as vertex 2, where" +
+                                    " there is a directed edge from a player to another " +
+                                    "if that player chooses ");
+                            System.out.println("to help the other player, and no edge otherwise," +
+                                    " this is what our graph would look like: ");
+                            if (move1 == 1) {
+                                System.out.println("Player 1 helps Player 2, so there is a " +
+                                        "directed edge from vertex 1 to vertex 2. ");
+                            } else if (move1 == 2) {
+                                System.out.println("Player 1 harms Player 2, so there is no " +
+                                        "directed edge from vertex 1 to vertex 2. ");
+                            }
+                            if (move2 == 1) {
+                                System.out.println("Player 2 helps Player 1, so there is a " +
+                                        "directed edge from vertex 2 to vertex 1. ");
+                            } else if (move2 == 2) {
+                                System.out.println("Player 2 harms Player 1, so there is no " +
+                                        "directed edge from vertex 2 to vertex 1. ");
+                            }
+                            if (move1 == 1 && move2 == 1) {
+                                System.out.println("These two vertices are strongly connected " +
+                                        "because both players chose to help each other.");
+                            }
+                            if (move1 == 2 && move2 == 2) {
+                                System.out.println("These two vertices are disconnected " +
+                                        "because both players chose to harm each other.");
+                            }
+                        }
+                    }
+                }
+            } else if (input.equals("5")) {
                 System.out.println("Type the number of moves you want each player to have," +
                         " either 2 or 3 (please do not add extra characters or spaces).");
                 System.out.println("If an integer other than 2 or 3 is entered, the " +

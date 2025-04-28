@@ -167,4 +167,11 @@ public class PayoffMatrix {
         return pq;
     }
 
+/**
+ * Getter for numMoves
+ */
+ public int getNumMoves() {
+        return numMoves;
+    }
+
 }
