@@ -158,10 +158,20 @@ public class Main {
                             if (move1 == 1 && move2 == 1) {
                                 System.out.println("These two vertices are strongly connected " +
                                         "because both players chose to help each other.");
+                                System.out.println("If we were to think about a large social " +
+                                        "network where there are many more people with similar" +
+                                        " payoff values, ");
+                                System.out.println("We can expect that this will form a mostly" +
+                                        " connected graph.");
                             }
                             if (move1 == 2 && move2 == 2) {
                                 System.out.println("These two vertices are disconnected " +
                                         "because both players chose to harm each other.");
+                                System.out.println("If we were to think about a large social " +
+                                        "network where there are many more people with similar" +
+                                        " payoff values, ");
+                                System.out.println("We can expect that this will form a mostly" +
+                                        " disconnected graph.");
                             }
                         }
                     }
