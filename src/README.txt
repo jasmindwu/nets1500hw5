@@ -18,4 +18,4 @@ Social Networks (exploring the motivation behind interconnectivity based off of 
 
 Work breakdown:
 Jasmin: Main class, PayoffMatrix class
-Lihini:
+Lihini: MainGUI
