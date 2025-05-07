@@ -17,5 +17,6 @@ Game Theory, Auctions, Matching Markets (payoff matrices and Nash Equilibria)
 Social Networks (exploring the motivation behind interconnectivity based off of different payoff values)
 
 Work breakdown:
-Jasmin: Main class, PayoffMatrix class
-Lihini: MainGUI
+Jasmin: PayoffMatrix class, Main class logic (1-3, creating payoff matrix)
+Lihini: MainGUI, stimulateDeviationPath in PayoffMatrix, logic behind analyzing
+equilibrium transition paths

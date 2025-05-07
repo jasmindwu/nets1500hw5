@@ -1,5 +1,4 @@
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 public class PayoffMatrix {
     private int numMoves;
@@ -167,11 +166,65 @@ public class PayoffMatrix {
         return pq;
     }
 
-/**
- * Getter for numMoves
- */
- public int getNumMoves() {
+    /**
+     * Getter for numMoves
+     */
+    public int getNumMoves() {
         return numMoves;
     }
 
+    public List<String> simulateDeviationPath(int startRow, int startCol, int deviatingPlayer, int deviationMove) {
+        List<String> path = new ArrayList<>();
+        path.add("Move" + startRow + ",Move" + startCol);
+
+        int currentP1Move = startRow;
+        int currentP2Move = startCol;
+        Set<String> visitedStates = new HashSet<>();
+        visitedStates.add("Move" + currentP1Move + ",Move" + currentP2Move);
+
+        // first deviation specified by input
+        if (deviatingPlayer == 1) {
+            currentP1Move = deviationMove;
+        } else {
+            currentP2Move = deviationMove;
+        }
+        String newState = "Move" + currentP1Move + ",Move" + currentP2Move;
+        path.add(newState);
+        visitedStates.add(newState);
+
+        // back and forth between deviatign players
+        int activePlayer = (deviatingPlayer == 1) ? 2 : 1;
+        int maxIter = numMoves * 4;
+        int iter = 0;
+
+        while (iter < maxIter) {
+            iter++;
+
+            // get best responses as next move
+            int newMove;
+            if (activePlayer == 1) {
+                newMove = findBestResponse(currentP2Move, 1);
+                if (newMove == currentP1Move) break;
+                currentP1Move = newMove;
+            } else {
+                newMove = findBestResponse(currentP1Move, 2);
+                if (newMove == currentP2Move) break;
+                currentP2Move = newMove;
+            }
+
+            newState = "Move" + currentP1Move + ",Move" + currentP2Move;
+
+            // if cycles we stop
+            if (visitedStates.contains(newState)) {
+                path.add(newState + " (cycle detected)");
+                break;
+            }
+
+            path.add(newState);
+            visitedStates.add(newState);
+            activePlayer = 3 - activePlayer;
+        }
+
+        return path;
+    }
 }

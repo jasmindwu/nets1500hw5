@@ -2,7 +2,8 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
+import java.util.*;
+import java.util.List;
 
 public class MainGUI {
     private JFrame frame;
@@ -16,9 +17,13 @@ public class MainGUI {
     private JPanel matrixPanel;
     private JPanel graphPanel;
     private JLabel graphImageLabel;
-    private enum InputState { MAIN_MENU, WAITING_FOR_PLAYER, WAITING_FOR_MOVE }
+    private enum InputState { MAIN_MENU, WAITING_FOR_PLAYER, WAITING_FOR_MOVE,
+        WAITING_FOR_EQUILIBRIUM, WAITING_FOR_DEVIATING_PLAYER,
+        WAITING_FOR_DEVIATION_MOVE }
     private InputState currentState = InputState.MAIN_MENU;
     private int currentPlayer;
+    private ArrayList<Integer> currentEq;
+
 
     public MainGUI() {
         createGUI();
@@ -128,6 +133,15 @@ public class MainGUI {
                 case WAITING_FOR_MOVE:
                     handleMoveInput(input);
                     break;
+                case WAITING_FOR_EQUILIBRIUM:
+                    handleEquilibriumInput(input);
+                    break;
+                case WAITING_FOR_DEVIATING_PLAYER:
+                    handleDeviatingPlayerInput(input);
+                    break;
+                case WAITING_FOR_DEVIATION_MOVE:
+                    handleDeviationMoveInput(input);
+                    break;
             }
         }
     }
@@ -146,14 +160,10 @@ public class MainGUI {
                 currentState = InputState.WAITING_FOR_PLAYER;
                 break;
             case "4":
-                if (matrix.getNumMoves() != 2) {
-                    outputArea.append("Social network analysis is only available for 2x2 matrices.\n");
-                } else {
-                    analyzeSocialRelations();
-                }
+                resizeMatrix();
                 break;
             case "5":
-                resizeMatrix();
+                startDeviationAnalysis();
                 break;
             default:
                 outputArea.append("Invalid command. Please enter a number between 1-5 or 'exit'.\n");
@@ -330,8 +340,8 @@ public class MainGUI {
         outputArea.append("1. Find the pure strategy Nash Equilibria, if they exist.\n");
         outputArea.append("2. If you have a 2x2 matrix, find the mixed strategy Nash Equilibrium.\n");
         outputArea.append("3. Find a player's best response to the other player's specific move.\n");
-        outputArea.append("4. For a 2x2 matrix, see how the pure-strategy Nash Equilibria translate to social networks.\n");
-        outputArea.append("5. Toggle between 2x2 and 3x3 matrix size.\n");
+        outputArea.append("4. Toggle between 2x2 and 3x3 matrix size.\n");
+        outputArea.append("5. Analyze equilibrium transition paths.\n");
         outputArea.append("Type 'exit' to quit.\n");
         currentState = InputState.MAIN_MENU;
     }
@@ -349,6 +359,7 @@ public class MainGUI {
                 outputArea.append("(Move " + move1 + " for P1, Move " + move2 + " for P2)\n");
             }
         }
+        showOptions();
     }
 
     /** Finds mixed strat equilibrium if it exists. */
@@ -362,6 +373,7 @@ public class MainGUI {
             double q = mixedPQ.get(1);
             outputArea.append("p = " + p + "; q = " + q + "\n");
         }
+        showOptions();
     }
 
 
@@ -436,61 +448,90 @@ public class MainGUI {
         showOptions();
     }
 
-    /** Looks through payoffs and determines relationships for graph */
-    private void analyzeSocialRelations() {
-        // to hold whether or not a move "helps"
-        boolean[][] helps = new boolean[2][2]; // helps[from][to]
+    private void startDeviationAnalysis() {
+        ArrayList<ArrayList<Integer>> equilibria = matrix.findPureNashEquilibrium();
+        if (equilibria == null) {
+            outputArea.append("No pure Nash equilibria found.\n");
+            return;
+        }
 
-        // check payoffs to determine harming
-        for (int p1Move = 0; p1Move < numMoves; p1Move++) {
-            for (int p2Move = 0; p2Move < numMoves; p2Move++) {
-                // p1 on p2
-                if (p2Payoffs[p1Move][p2Move] > getAverageP2Payoff(p2Move)) {
-                    helps[0][1] = true;
-                }
+        // Let user choose equilibrium
+        outputArea.append("Select a Nash equilibrium to start from:\n");
+        for (int i = 0; i < equilibria.size(); i++) {
+            ArrayList<Integer> eq = equilibria.get(i);
+            outputArea.append((i+1) + ". (Move " + eq.get(0) + ", Move " + eq.get(1) + ")\n");
+        }
+        currentState = InputState.WAITING_FOR_EQUILIBRIUM;
+    }
 
-                // p2 on p1
-                if (p1Payoffs[p1Move][p2Move] > getAverageP1Payoff(p1Move)) {
-                    helps[1][0] = true;
-                }
+    private void handleEquilibriumInput(String input) {
+        try {
+            int choice = Integer.parseInt(input);
+            ArrayList<ArrayList<Integer>> equilibria = matrix.findPureNashEquilibrium();
+            if (choice < 1 || choice > equilibria.size()) {
+                outputArea.append("Invalid selection.\n");
+                return;
             }
+
+            ArrayList<Integer> selectedEq = equilibria.get(choice - 1);
+            outputArea.append("Selected: (Move " + selectedEq.get(0) + ", Move " + selectedEq.get(1) + ")\n");
+            outputArea.append("Which player deviates? (1 or 2):\n");
+            currentState = InputState.WAITING_FOR_DEVIATING_PLAYER;
+            currentEq = selectedEq;
+        } catch (NumberFormatException e) {
+            outputArea.append("Please enter a valid number.\n");
         }
-
-        displaySocialGraph(helps);
     }
 
-    /** Displays social graph based on payoffs calculated above.*/
-    private void displaySocialGraph(boolean[][] helps) {
-        // simple text graph
-        String graphText = "<html><pre>";
-        graphText += "Player 1";
-        if (helps[0][1]) graphText += " → ";
-        else graphText += " × ";
-        graphText += "Player 2<br>";
+    private void handleDeviatingPlayerInput(String input) {
+        try {
+            int player = Integer.parseInt(input);
+            if (player != 1 && player != 2) {
+                outputArea.append("Please enter 1 or 2.\n");
+                return;
+            }
 
-        graphText += "Player 2";
-        if (helps[1][0]) graphText += " → ";
-        else graphText += " × ";
-        graphText += "Player 1</pre></html>";
-
-        graphImageLabel.setText(graphText);
-    }
-
-    private double getAverageP1Payoff(int move) {
-        double sum = 0;
-        for (int j = 0; j < numMoves; j++) {
-            sum += p1Payoffs[move][j];
+            outputArea.append("Enter deviation move (1-" + matrix.getNumMoves() + "):\n");
+            currentState = InputState.WAITING_FOR_DEVIATION_MOVE;
+            currentPlayer = player;
+        } catch (NumberFormatException e) {
+            outputArea.append("Please enter a valid number.\n");
         }
-        return sum / numMoves;
     }
 
-    private double getAverageP2Payoff(int move) {
-        double sum = 0;
-        for (int i = 0; i < numMoves; i++) {
-            sum += p2Payoffs[i][move];
+    private void handleDeviationMoveInput(String input) {
+        try {
+            int move = Integer.parseInt(input);
+            if (move < 1 || move > matrix.getNumMoves()) {
+                outputArea.append("Invalid move.\n");
+                return;
+            }
+
+            // mat to simulate path
+            List<String> path = matrix.simulateDeviationPath(
+                    currentEq.get(0), currentEq.get(1),
+                    currentPlayer,
+                    move
+            );
+
+            // show path
+            StringBuilder graphText = new StringBuilder("<html><pre>Deviation Path:\n");
+            for (int i = 0; i < path.size(); i++) {
+                if (i > 0) graphText.append(" → ");
+                graphText.append(path.get(i));
+            }
+            graphText.append("</pre></html>");
+
+            graphImageLabel.setText(graphText.toString());
+            outputArea.append("Deviation path visualized.\n");
+            currentState = InputState.MAIN_MENU;
+            showOptions();
+        } catch (NumberFormatException e) {
+            outputArea.append("Please enter a valid move.\n");
         }
-        return sum / numMoves;
     }
+
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
